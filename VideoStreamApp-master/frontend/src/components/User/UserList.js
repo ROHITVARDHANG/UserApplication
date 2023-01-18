@@ -40,7 +40,7 @@ export default function UserList({ setLoggedIn }) {
                                 <Card sx={{ display: 'flex' }}>
                                     <CardContent sx={{ flex: 1 }}>
                                         <Typography component="h2" variant="h5">
-                                            <Link to={`/video/${user._id}`} style={{ textDecoration: "none", color: "black" }}>{user.fullname}</Link>
+                                            <Link to={`/user/${user._id}`} style={{ textDecoration: "none", color: "black" }}>{user.fullname}</Link>
                                         </Typography>
                                         <Typography variant="subtitle1" color="text.secondary">
                                             {user.email}

@@ -13,34 +13,57 @@ import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useValidator } from 'validator';
 
-function Copyright(props) {
-  return (
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
-      {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
 
 const theme = createTheme();
 
 export default function SignUp() {
+
+  const [fnvalues, setFNValues] = React.useState({
+    flname: ""
+  });
+  const [lnvalues, setLNValues] = React.useState({
+    lnname: ""
+  });
+  const [emailvalues, setEmailValues] = React.useState({
+    emailId: ""
+  });
+
+  const handleFLChange = flname => event => {
+    if (/[^0-9a-zA-Z]/.test(event.target.value)) {
+    } else {
+      setFNValues({ ...fnvalues, [flname]: event.target.value });
+    }
+  };
+
+  const handleLNChange = lnname => event => {
+    if (/[^0-9a-zA-Z]/.test(event.target.value)) {
+    } else {
+      setLNValues({ ...lnvalues, [lnname]: event.target.value });
+    }
+  };
+
+  const handleEmailChange = emailId => event => {
+    setEmailValues({ ...emailvalues, [emailId]: event.target.value });
+  };
+
+  const regexEmail = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+  const error = regexEmail.test(emailvalues.emailId);
+
   let navigate = useNavigate();
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const form = {
-      fullname : data.get('fname') +' '+ data.get('lname'),
-      email: data.get('email'),
-      password: data.get('password')
-    };
-    await axios.post("http://localhost:3002/api/v1/user/signup", form);  
-    navigate('/')
+    if (error) {
+      const data = new FormData(event.currentTarget);
+      const form = {
+        fullname: data.get('fname') + ' ' + data.get('lname'),
+        email: data.get('email'),
+        password: data.get('password')
+      };
+      await axios.post("http://localhost:3002/api/v1/user/signup", form);
+      navigate('/')
+    }
   };
 
   return (
@@ -71,6 +94,9 @@ export default function SignUp() {
                   id="fname"
                   label="Fullname"
                   autoFocus
+                  value={fnvalues.flname}
+                  onChange={handleFLChange("flname")}
+                  inputProps={{ maxLength: 100 }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -81,6 +107,9 @@ export default function SignUp() {
                   label="Last Name"
                   name="lname"
                   autoComplete="family-name"
+                  value={lnvalues.lnname}
+                  onChange={handleLNChange("lnname")}
+                  inputProps={{ maxLength: 100 }}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -91,6 +120,9 @@ export default function SignUp() {
                   label="Email Address"
                   name="email"
                   autoComplete="email"
+                  helperText={error ? "Perfect!" : "Email must in a correct email format"}
+                  onChange={handleEmailChange("emailId")}
+                  error={!error}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -128,7 +160,6 @@ export default function SignUp() {
             </Grid>
           </Box>
         </Box>
-        <Copyright sx={{ mt: 5 }} />
       </Container>
     </ThemeProvider>
   );

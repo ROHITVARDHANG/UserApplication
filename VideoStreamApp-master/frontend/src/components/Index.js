@@ -1,9 +1,7 @@
 import SignIn from "./Auth/SignIn";
 import SignUp from "./Auth/SignUp";
 import Header from "./Navbar/Header";
-import VideoList from "./Video/VideoList";
 import UserList from "./User/UserList";
-import Video from "./Video/Video";
 import {
     BrowserRouter,
     Routes,
@@ -20,9 +18,9 @@ export default function Index(props) {
             <BrowserRouter>
                 {isLoggedIn ?
                     <Routes>
-                        <Route path="/video" element={<VideoList setLoggedIn={setLoggedIn}/>}>
+                        <Route path="/user" element={<UserList setLoggedIn={setLoggedIn}/>}>
                         </Route>
-                        <Route path="/video/:id" element={<Video setLoggedIn={setLoggedIn}/>}>
+                        <Route path="/user/:id" element={<UserList setLoggedIn={setLoggedIn}/>}>
                         </Route>
                         <Route path="/user" element={<UserList setLoggedIn={setLoggedIn}/>}>
                         </Route>

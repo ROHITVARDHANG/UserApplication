@@ -10,7 +10,7 @@ import Button from '@mui/material/Button';
 import Modal from '@mui/material/Modal';
 import TextField from '@mui/material/TextField';
 import axios from 'axios';
-
+import { useNavigate } from 'react-router-dom';
 const style = {
     position: 'absolute',
     top: '50%',
@@ -23,60 +23,84 @@ const style = {
     p: 4,
 };
 
-const Search = styled('div')(({ theme }) => ({
-    position: 'relative',
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: alpha(theme.palette.common.white, 0.15),
-    '&:hover': {
-        backgroundColor: alpha(theme.palette.common.white, 0.25),
-    },
-    marginLeft: 0,
-    width: '100%',
-    [theme.breakpoints.up('sm')]: {
-        marginLeft: theme.spacing(1),
-        width: 'auto',
-    },
-}));
+// const Search = styled('div')(({ theme }) => ({
+//     position: 'relative',
+//     borderRadius: theme.shape.borderRadius,
+//     backgroundColor: alpha(theme.palette.common.white, 0.15),
+//     '&:hover': {
+//         backgroundColor: alpha(theme.palette.common.white, 0.25),
+//     },
+//     marginLeft: 0,
+//     width: '100%',
+//     [theme.breakpoints.up('sm')]: {
+//         marginLeft: theme.spacing(1),
+//         width: 'auto',
+//     },
+// }));
 
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-    color: 'inherit',
-    '& .MuiInputBase-input': {
-        padding: theme.spacing(1, 1, 1, 0),
-        // vertical padding + font size from searchIcon
-        paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-        transition: theme.transitions.create('width'),
-        width: '100%',
-        [theme.breakpoints.up('sm')]: {
-            width: '12ch',
-            '&:focus': {
-                width: '20ch',
-            },
-        },
-    },
-}));
+// const StyledInputBase = styled(InputBase)(({ theme }) => ({
+//     color: 'inherit',
+//     '& .MuiInputBase-input': {
+//         padding: theme.spacing(1, 1, 1, 0),
+//         // vertical padding + font size from searchIcon
+//         paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+//         transition: theme.transitions.create('width'),
+//         width: '100%',
+//         [theme.breakpoints.up('sm')]: {
+//             width: '12ch',
+//             '&:focus': {
+//                 width: '20ch',
+//             },
+//         },
+//     },
+// }));
 
-export default function SearchAppBar({isLoggedIn}) {
+export default function SearchAppBar({ isLoggedIn }) {
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
-    const [video, setVideo] = React.useState("");
-    const [cover, setCover] = React.useState("");
-    const [title, setTitle] = React.useState("")
+    const [fnvalues, setFNValues] = React.useState({
+        flname: ""
+    });
+    const [lnvalues, setLNValues] = React.useState({
+        lnname: ""
+    });
+    const [emailvalues, setEmailValues] = React.useState({
+        emailId: ""
+    });
+    const handleFLChange = flname => event => {
+        if (/[^0-9a-zA-Z]/.test(event.target.value)) {
+        } else {
+            setFNValues({ ...fnvalues, [flname]: event.target.value });
+        }
+    };
+    const handleLNChange = lnname => event => {
+        if (/[^0-9a-zA-Z]/.test(event.target.value)) {
+        } else {
+            setLNValues({ ...lnvalues, [lnname]: event.target.value });
+        }
+    };
+    const handleEmailChange = emailId => event => {
+        setEmailValues({ ...emailvalues, [emailId]: event.target.value });
+    };
 
+    const regexEmail = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+    const error = regexEmail.test(emailvalues.emailId);
+    
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        if (error) {
+            const data = new FormData(event.currentTarget);
+            const form = {
+                fullname: data.get('fname') + ' ' + data.get('lname'),
+                email: data.get('email'),
+                password: data.get('password')
+            };
+            await axios.post("http://localhost:3002/api/v1/user/signup", form);
+            handleClose();
+        }
+    };
 
-    const submitForm = async (e) => {
-        e.preventDefault();
-        const formData = new FormData();
-        formData.append("title", title);
-        formData.append("video", video);
-        formData.append("cover", cover);
-        const token = localStorage.getItem('token');
-        await axios.post("http://localhost:3002/api/v1/video", formData, {
-            headers: ({
-                Authorization: 'Bearer ' + token
-            })
-        })
-    }
     return (
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static">
@@ -87,20 +111,14 @@ export default function SearchAppBar({isLoggedIn}) {
                         component="div"
                         sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
                     >
-                        Streamly
+                        User Management
                     </Typography>
                     {isLoggedIn &&
                         <>
-                            <Search>
-                                <StyledInputBase
-                                    placeholder="Search…"
-                                    inputProps={{ 'aria-label': 'search' }}
-                                />
-                            </Search>
                             <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
                             </Avatar>
                             <div>
-                                <Button variant="contained" onClick={handleOpen}>Add New</Button>
+                                <Button variant="contained" onClick={handleOpen}>Add User</Button>
                                 <Modal
                                     open={open}
                                     onClose={handleClose}
@@ -109,38 +127,52 @@ export default function SearchAppBar({isLoggedIn}) {
                                 >
                                     <Box sx={style}>
                                         <Typography id="modal-modal-title" variant="h6" component="h2">
-                                            <Box component="form" onSubmit={submitForm} noValidate sx={{ mt: 1 }}>
-                                                <label>Video Title:</label>
+                                            <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+                                                <label>First Name:</label>
                                                 <TextField
                                                     margin="normal"
                                                     required
                                                     fullWidth
-                                                    id="title"
-                                                    name="title"
+                                                    id="fname"
+                                                    name="fname"
                                                     autoFocus
-                                                    onChange={(e) => setTitle(e.target.value)}
+                                                    value={fnvalues.flname}
+                                                    onChange={handleFLChange("flname")}
+                                                    inputProps={{ maxLength: 100 }}
                                                 />
-                                                <label>Select Video:</label>
+                                                <label>Last Name:</label>
                                                 <TextField
                                                     margin="normal"
                                                     required
                                                     fullWidth
-                                                    id="video"
-                                                    name="video"
+                                                    id="lname"
+                                                    name="lname"
                                                     autoFocus
-                                                    type="file"
-                                                    onChange={(e) => setVideo(e.target.files[0])}
+                                                    value={lnvalues.lnname}
+                                                    onChange={handleLNChange("lnname")}
+                                                    inputProps={{ maxLength: 100 }}
                                                 />
-                                                <label>Select Cover Image:</label>
+
+                                                <label>Email Address:</label>
+                                                <TextField
+                                                    margin="normal"
+                                                    required
+                                                    fullWidth
+                                                    id="email"
+                                                    name="email"
+                                                    autoFocus
+                                                    helperText={error ? "Perfect!" : "Email must in a correct email format"}
+                                                    onChange={handleEmailChange("emailId")}
+                                                    error={!error}
+                                                />
+                                                <label>Password:</label>
                                                 <TextField
                                                     autoFocus
                                                     margin="normal"
                                                     required
                                                     fullWidth
-                                                    name="coverImage"
-                                                    type="file"
-                                                    id="coverImage"
-                                                    onChange={(e) => setCover(e.target.files[0])}
+                                                    name="password"
+                                                    id="password"
                                                 />
                                                 <Button
                                                     type="submit"
@@ -148,7 +180,7 @@ export default function SearchAppBar({isLoggedIn}) {
                                                     variant="contained"
                                                     sx={{ mt: 3, mb: 2 }}
                                                 >
-                                                    Upload
+                                                    create
                                                 </Button>
                                             </Box>
                                         </Typography>

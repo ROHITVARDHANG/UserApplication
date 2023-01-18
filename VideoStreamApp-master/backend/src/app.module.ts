@@ -9,11 +9,8 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { JwtModule } from '@nestjs/jwt';
 import { secret } from './utils/constants';
 import { join } from 'path';
-import { VideoController } from './controller/video.controller';
-import { VideoService } from './service/video.service';
 import { UserService } from './service/user.service';
 import { UserController } from './controller/user.controller';
-import { Video, VideoSchema } from './model/video.schema';
 import { User, UserSchema } from './model/user.schema';
 import { isAuthenticated } from './app.middleware';
 
@@ -21,7 +18,6 @@ import { isAuthenticated } from './app.middleware';
   imports: [
      MongooseModule.forRoot('mongodb://localhost:27017/Stream'),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    MongooseModule.forFeature([{ name: Video.name, schema: VideoSchema }]),
 
      MulterModule.register({
        storage: diskStorage({
@@ -41,8 +37,8 @@ import { isAuthenticated } from './app.middleware';
     }),
   ],
  
-controllers: [AppController, VideoController, UserController],
-providers: [AppService, VideoService, UserService],
+controllers: [AppController, UserController],
+providers: [AppService, UserService],
 })
 
 export class AppModule {
@@ -50,8 +46,8 @@ export class AppModule {
     consumer
       .apply(isAuthenticated)
       .exclude(
-        { path: 'api/v1/video/:id', method: RequestMethod.GET }
+        { path: 'api/v1/user/:id', method: RequestMethod.GET }
       )
-      .forRoutes(VideoController);
+      .forRoutes(UserController);
   }
 }
